@@ -1,7 +1,8 @@
 import { ChangeEventHandler, FC, useCallback, useState } from 'react'
+import type { UploadedFile } from '~/models'
 
 type Props = {
-  onUpload(file: File): void
+  onUpload(file: UploadedFile): void
 }
 
 const ImageUploader: FC<Props> = ({ onUpload }) => {
@@ -9,7 +10,14 @@ const ImageUploader: FC<Props> = ({ onUpload }) => {
     event => {
       const file = event.target.files?.[0] ?? null
       if (file) {
-        onUpload(file)
+        const reader = new FileReader()
+        reader.onload = () => {
+          if (reader.result) {
+            onUpload({ name: file.name, src: reader.result as string })
+          }
+        }
+
+        reader.readAsDataURL(file)
       }
     },
     [onUpload],
